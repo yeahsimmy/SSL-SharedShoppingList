@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Shopping Dashboard</title>
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --dark:#0f172a;
+      --dark2:#334155;
+      --soft:#f8fafc;
+      --ok:#dcfce7;
+      --warn:#fef3c7;
+      --danger:#fee2e2;
+      --ok-text:#166534;
+      --warn-text:#92400e;
+      --danger-text:#991b1b;
+      --shadow:0 10px 30px rgba(15,23,42,.10);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    button,input,select{font:inherit}
+    .app{max-width:1200px;margin:0 auto;padding:16px}
+    .phone{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:32px;
+      box-shadow:0 20px 60px rgba(15,23,42,.12);
+      padding:14px;
+      min-height:100vh;
+    }
+    .hero{
+      background:linear-gradient(135deg,var(--dark),var(--dark2));
+      color:#fff;
+      border-radius:26px;
+      padding:20px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+    }
+    .hero h1{margin:6px 0 8px 0;font-size:30px;line-height:1.1}
+    .hero p{margin:0}
+    .hero .sub{color:#cbd5e1;font-size:14px}
+    .badge{
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      white-space:nowrap;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,.16);
+    }
+    .grid{display:grid;gap:12px}
+    .metrics{grid-template-columns:repeat(5,1fr);margin-top:14px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .metric{
+      padding:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .metric .label{font-size:12px;color:var(--muted)}
+    .metric .value{font-size:20px;font-weight:700;margin-top:4px}
+    .icon{
+      width:40px;height:40px;border-radius:16px;
+      display:grid;place-items:center;background:#f1f5f9;font-size:18px;
+    }
+    .tabs{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      background:#f8fafc;
+      border:1px solid var(--border);
+      padding:8px;
+      border-radius:20px;
+      margin-top:16px;
+    }
+    .tab-btn{
+      border:none;
+      background:transparent;
+      border-radius:14px;
+      padding:12px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .tab-btn.active{
+      background:#fff;
+      box-shadow:var(--shadow);
+    }
+    .tab-panel{margin-top:16px;display:none}
+    .tab-panel.active{display:block}
+    .two-col{grid-template-columns:1.1fr .9fr}
+    .three-col{grid-template-columns:repeat(3,1fr)}
+    .section{padding:18px}
+    .section h3{margin:0 0 4px 0;font-size:16px}
+    .section .desc{color:var(--muted);font-size:14px;margin-bottom:14px}
+    .progress-wrap{margin:14px 0}
+    .progress-head{
+      display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px
+    }
+    .progress{
+      width:100%;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden
+    }
+    .progress > div{height:100%;background:#111827;border-radius:999px}
+    .list{display:grid;gap:12px}
+    .mini{
+      padding:14px;background:var(--soft);border-radius:18px;font-size:14px;color:#334155
+    }
+    .toolbar{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap
+    }
+    .btn{
+      border:none;background:#111827;color:#fff;padding:12px 16px;border-radius:16px;
+      cursor:pointer;font-weight:600
+    }
+    .btn.secondary{background:#e2e8f0;color:#111827}
+    .input,.select{
+      width:100%;padding:12px 14px;border-radius:16px;border:1px solid var(--border);background:#fff
+    }
+    .search-row{margin-top:12px}
+    .row-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .shopping-item,.upload-item{
+      display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+      padding:14px;border:1px solid var(--border);border-radius:18px
+    }
+    .shopping-left{display:flex;gap:12px;min-width:0}
+    .check{
+      width:22px;height:22px;border-radius:999px;border:2px solid #94a3b8;cursor:pointer;
+      flex:0 0 auto;margin-top:2px;background:#fff
+    }
+    .check.done{background:#111827;border-color:#111827;position:relative}
+    .check.done::after{
+      content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:14px
+    }
+    .title{font-weight:700}
+    .done-text{text-decoration:line-through;color:#94a3b8}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .chip{
+      padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#fff
+    }
+    .chip.dark{background:#eef2ff}
+    .delete{
+      border:none;background:transparent;font-size:18px;cursor:pointer;color:#64748b
+    }
+    .product{
+      display:grid;grid-template-columns:88px 1fr;gap:12px;padding:12px;border:1px solid var(--border);border-radius:22px
+    }
+    .product img{
+      width:88px;height:88px;object-fit:cover;border-radius:18px;background:#e5e7eb
+    }
+    .product-head{display:flex;justify-content:space-between;gap:12px}
+    .status{
+      font-size:12px;padding:6px 10px;border-radius:999px;white-space:nowrap
+    }
+    .status.ok{background:var(--ok);color:var(--ok-text)}
+    .status.warn{background:var(--warn);color:var(--warn-text)}
+    .status.danger{background:var(--danger);color:var(--danger-text)}
+    .meta{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;font-size:13px;color:#475569
+    }
+    .upload-drop{
+      border:2px dashed #cbd5e1;border-radius:24px;padding:28px;text-align:center;background:#fff
+    }
+    .small{font-size:12px;color:var(--muted)}
+    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .bar > div{height:100%;background:#111827;border-radius:999px}
+    .member-row{margin-bottom:14px}
+    .form-card{padding:16px;border:1px solid var(--border);border-radius:20px;background:#fcfcfd;margin-bottom:14px}
+    @media (max-width:980px){
+      .metrics{grid-template-columns:repeat(2,1fr)}
+      .two-col,.three-col{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const initialData = {
+      "teamMembers": ["Yesim", "Alex", "Mina"],
+      "items": [
+        {
+          "id": 1,
+          "name": "Milch",
+          "category": "Kühlung",
+          "price": 1.79,
+          "stock": 1,
+          "minStock": 2,
+          "assignee": "Yesim",
+          "sharedWith": ["Yesim", "Alex", "Mina"],
+          "image": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "id": 2,
+          "name": "Pasta",
+          "category": "Trockenwaren",
+          "price": 1.29,
+          "stock": 4,
+          "minStock": 2,
+          "assignee": "Alex",
+          "sharedWith": ["Yesim", "Alex"],
+          "image": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "id": 3,
+          "name": "Äpfel",
+          "category": "Obst",
+          "price": 2.99,
+          "stock": 0,
+          "minStock": 5,
+          "assignee": "Mina",
+          "sharedWith": ["Yesim", "Mina"],
+          "image": "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "id": 4,
+          "name": "Spülmittel",
+          "category": "Haushalt",
+          "price": 3.49,
+          "stock": 2,
+          "minStock": 1,
+          "assignee": "Yesim",
+          "sharedWith": ["Yesim", "Alex", "Mina"],
+          "image": "https://images.unsplash.com/photo-1583947582886-f40ec95dd752?auto=format&fit=crop&w=600&q=80"
+        }
+      ],
+      "shoppingList": [
+        {
+          "id": 101,
+          "title": "Milch 2x",
+          "priority": "Hoch",
+          "buyer": "Yesim",
+          "estimatedPrice": 3.58,
+          "done": false
+        },
+        {
+          "id": 102,
+          "title": "Äpfel 1kg",
+          "priority": "Mittel",
+          "buyer": "Mina",
+          "estimatedPrice": 2.99,
+          "done": false
+        },
+        {
+          "id": 103,
+          "title": "Küchenrolle",
+          "priority": "Niedrig",
+          "buyer": "Alex",
+          "estimatedPrice": 2.49,
+          "done": true
+        }
+      ],
+      "uploads": [
+        {
+          "id": 301,
+          "title": "Kassenbon Supermarkt",
+          "by": "Yesim",
+          "type": "Beleg",
+          "date": "Heute"
+        },
+        {
+          "id": 302,
+          "title": "Foto Kühlschrank",
+          "by": "Alex",
+          "type": "Bestandsfoto",
+          "date": "Gestern"
+        },
+        {
+          "id": 303,
+          "title": "Vorratsschrank",
+          "by": "Mina",
+          "type": "Inventarfoto",
+          "date": "Vor 2 Tagen"
+        }
+      ]
+    };
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(value || 0)
+    }
+
+    function getStatus(item) {
+      if (item.stock === 0) return { label: 'Leer', cls: 'danger' }
+      if (item.stock <= item.minStock) return { label: 'Nachkaufen', cls: 'warn' }
+      return { label: 'OK', cls: 'ok' }
+    }
+
+    function MetricCard({ label, value, icon }) {
+      return (
+        <div className="card metric">
+          <div>
+            <div className="label">{label}</div>
+            <div className="value">{value}</div>
+          </div>
+          <div className="icon">{icon}</div>
+        </div>
+      )
+    }
+
+    function App() {
+      const [tab, setTab] = useState('dashboard')
+      const [items, setItems] = useState(initialData.items)
+      const [shoppingList, setShoppingList] = useState(initialData.shoppingList)
+      const [uploads, setUploads] = useState(initialData.uploads)
+      const [search, setSearch] = useState('')
+      const [shoppingFormOpen, setShoppingFormOpen] = useState(false)
+      const [inventoryFormOpen, setInventoryFormOpen] = useState(false)
+      const [shoppingForm, setShoppingForm] = useState({
+        title: '',
+        priority: 'Mittel',
+        buyer: 'Yesim',
+        estimatedPrice: ''
+      })
+      const [inventoryForm, setInventoryForm] = useState({
+        name: '',
+        category: '',
+        price: '',
+        stock: '',
+        minStock: 1,
+        assignee: 'Yesim'
+      })
+      const [uploadPreview, setUploadPreview] = useState(null)
+
+      const teamMembers = initialData.teamMembers
+
+      const metrics = useMemo(() => {
+        const totalInventoryValue = items.reduce((sum, i) => sum + i.price * i.stock, 0)
+        const lowStockCount = items.filter(i => i.stock <= i.minStock).length
+        const outOfStockCount = items.filter(i => i.stock === 0).length
+        const fullyShared = items.filter(i => i.sharedWith.length >= 2).length
+        const sharedCoverage = items.length ? Math.round((fullyShared / items.length) * 100) : 0
+        const openShoppingValue = shoppingList.filter(i => !i.done).reduce((sum, i) => sum + i.estimatedPrice, 0)
+        const completionRate = shoppingList.length
+          ? Math.round((shoppingList.filter(i => i.done).length / shoppingList.length) * 100)
+          : 0
+        return { totalInventoryValue, lowStockCount, outOfStockCount, sharedCoverage, openShoppingValue, completionRate }
+      }, [items, shoppingList])
+
+      const memberSpend = useMemo(() => {
+        return teamMembers.map(member => ({
+          member,
+          total: shoppingList
+            .filter(entry => entry.buyer === member)
+            .reduce((sum, entry) => sum + entry.estimatedPrice, 0)
+        }))
+      }, [shoppingList, teamMembers])
+
+      const filteredItems = useMemo(() => {
+        const q = search.trim().toLowerCase()
+        return items.filter(item =>
+          item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q)
+        )
+      }, [items, search])
+
+      function addShoppingItem() {
+        if (!shoppingForm.title.trim()) {
+          alert('Bitte einen Titel eingeben.')
+          return
+        }
+        setShoppingList(prev => [
+          {
+            id: Date.now(),
+            title: shoppingForm.title.trim(),
+            priority: shoppingForm.priority,
+            buyer: shoppingForm.buyer,
+            estimatedPrice: Number(shoppingForm.estimatedPrice || 0),
+            done: false,
+          },
+          ...prev,
+        ])
+        setShoppingForm({
+          title: '',
+          priority: 'Mittel',
+          buyer: 'Yesim',
+          estimatedPrice: ''
+        })
+      }
+
+      function toggleShopping(id) {
+        setShoppingList(prev => prev.map(item => item.id === id ? { ...item, done: !item.done } : item))
+      }
+
+      function deleteShopping(id) {
+        setShoppingList(prev => prev.filter(item => item.id !== id))
+      }
+
+      function addInventoryItem() {
+        if (!inventoryForm.name.trim() || !inventoryForm.price) {
+          alert('Bitte mindestens Produktname und Preis eingeben.')
+          return
+        }
+        setItems(prev => [
+          {
+            id: Date.now(),
+            name: inventoryForm.name.trim(),
+            category: inventoryForm.category.trim() || 'Allgemein',
+            price: Number(inventoryForm.price),
+            stock: Number(inventoryForm.stock || 0),
+            minStock: Number(inventoryForm.minStock || 1),
+            assignee: inventoryForm.assignee,
+            sharedWith: ['Yesim', 'Alex'],
+            image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80',
+          },
+          ...prev,
+        ])
+        setInventoryForm({
+          name: '',
+          category: '',
+          price: '',
+          stock: '',
+          minStock: 1,
+          assignee: 'Yesim'
+        })
+      }
+
+      function handleFileUpload(event) {
+        const file = event.target.files?.[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onload = e => {
+          const image = e.target?.result
+          setUploadPreview({
+            name: file.name,
+            size: `${(file.size / 1024).toFixed(1)} KB`,
+            image
+          })
+          setUploads(prev => [
+            {
+              id: Date.now(),
+              title: file.name,
+              by: 'Yesim',
+              type: 'Foto-Upload',
+              date: 'Gerade eben'
+            },
+            ...prev
+          ])
+        }
+        reader.readAsDataURL(file)
+      }
+
+      const maxSpend = Math.max(...memberSpend.map(e => e.total), 1)
+      const stockStability = Math.max(0, 100 - metrics.lowStockCount * 15)
+
+      return (
+        <div className="app">
+          <div className="phone">
+            <section className="hero">
+              <div>
+                <p className="sub">Shared Home Dashboard</p>
+                <h1>Gemeinsames Einkaufs- &amp; Bestandsmanagement</h1>
+                <p className="sub">React mit JSON-Datenquelle, Einkaufsliste, Uploads, Preisen, Beständen und KPIs.</p>
+              </div>
+              <div className="badge">React + JSON</div>
+            </section>
+
+            <section className="grid metrics">
+              <MetricCard label="Inventarwert" value={formatCurrency(metrics.totalInventoryValue)} icon="€" />
+              <MetricCard label="Kritische Bestände" value={metrics.lowStockCount} icon="⚠️" />
+              <MetricCard label="Leerstände" value={metrics.outOfStockCount} icon="📦" />
+              <MetricCard label="Offene Einkäufe" value={formatCurrency(metrics.openShoppingValue)} icon="🛒" />
+              <MetricCard label="Gemeinsame Abdeckung" value={`${metrics.sharedCoverage}%`} icon="👥" />
+            </section>
+
+            <div className="tabs">
+              {[['dashboard', 'Dashboard'], ['shopping', 'Liste'], ['inventory', 'Bestand'], ['uploads', 'Uploads']].map(([key, label]) => (
+                <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {tab === 'dashboard' && (
+              <section className="tab-panel active">
+                <div className="grid two-col">
+                  <div className="card section">
+                    <h3>KPI Übersicht</h3>
+                    <div className="desc">Gemeinsame Leistung im aktuellen Zyklus</div>
+                    <div className="progress-wrap">
+                      <div className="progress-head"><span>Erledigungsquote Einkaufsliste</span><strong>{metrics.completionRate}%</strong></div>
+                      <div className="progress"><div style={{ width: `${metrics.completionRate}%` }} /></div>
+                    </div>
+                    <div className="progress-wrap">
+                      <div className="progress-head"><span>Bestandsstabilität</span><strong>{stockStability}%</strong></div>
+                      <div className="progress"><div style={{ width: `${stockStability}%` }} /></div>
+                    </div>
+                    <div className="progress-wrap">
+                      <div className="progress-head"><span>Datenaktualität via Uploads</span><strong>92%</strong></div>
+                      <div className="progress"><div style={{ width: '92%' }} /></div>
+                    </div>
+                  </div>
+                  <div className="card section">
+                    <h3>Ausgaben nach Person</h3>
+                    <div className="desc">Geplante Einkäufe im Team verteilt</div>
+                    {memberSpend.map(entry => (
+                      <div className="member-row" key={entry.member}>
+                        <div className="progress-head"><span>{entry.member}</span><strong>{formatCurrency(entry.total)}</strong></div>
+                        <div className="bar"><div style={{ width: `${Math.round((entry.total / maxSpend) * 100)}%` }} /></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid three-col" style={{ marginTop: 14 }}>
+                  <div className="card section">
+                    <h3>Wichtigste Features</h3>
+                    <div className="list">
+                      <div className="mini">Gemeinsam nutzbare Einkaufsliste mit Zuständigkeiten</div>
+                      <div className="mini">Preis- und Bestandsverfolgung je Produkt</div>
+                      <div className="mini">Foto-Upload für Belege, Kühlschrank und Lager</div>
+                    </div>
+                  </div>
+                  <div className="card section">
+                    <h3>Beispiele für 2–3 Personen</h3>
+                    <div className="list">
+                      <div className="mini">WG mit geteilter Kostenübersicht</div>
+                      <div className="mini">Familie mit Wochenplanung und Mindestbeständen</div>
+                      <div className="mini">Paar mit Haushalts- und Vorratsmanagement</div>
+                    </div>
+                  </div>
+                  <div className="card section">
+                    <h3>Kern-KPIs</h3>
+                    <div className="list">
+                      <div className="mini">Inventarwert und Leerstandsquote</div>
+                      <div className="mini">Offene Einkaufskosten</div>
+                      <div className="mini">Erledigungsrate und Shared-Coverage</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {tab === 'shopping' && (
+              <section className="tab-panel active">
+                <div className="card section">
+                  <div className="toolbar">
+                    <div><h3>Gemeinsame Shoppingliste</h3><div className="desc">Für 2–3 Personen parallel nutzbar</div></div>
+                    <button className="btn" onClick={() => setShoppingFormOpen(v => !v)}>+ Neuer Eintrag</button>
+                  </div>
+                  {shoppingFormOpen && (
+                    <div className="form-card" style={{ marginBottom: 14 }}>
+                      <div className="grid" style={{ gap: 10 }}>
+                        <input className="input" placeholder="z. B. Reis 1kg" value={shoppingForm.title} onChange={e => setShoppingForm({ ...shoppingForm, title: e.target.value })} />
+                        <div className="row-2">
+                          <select className="select" value={shoppingForm.priority} onChange={e => setShoppingForm({ ...shoppingForm, priority: e.target.value })}>
+                            <option>Hoch</option><option>Mittel</option><option>Niedrig</option>
+                          </select>
+                          <select className="select" value={shoppingForm.buyer} onChange={e => setShoppingForm({ ...shoppingForm, buyer: e.target.value })}>
+                            {teamMembers.map(member => <option key={member}>{member}</option>)}
+                          </select>
+                        </div>
+                        <input className="input" type="number" step="0.01" placeholder="Geschätzter Preis in EUR" value={shoppingForm.estimatedPrice} onChange={e => setShoppingForm({ ...shoppingForm, estimatedPrice: e.target.value })} />
+                        <button className="btn" onClick={addShoppingItem}>Eintrag speichern</button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="list">
+                    {shoppingList.map(entry => (
+                      <div className="shopping-item" key={entry.id}>
+                        <div className="shopping-left">
+                          <button className={`check ${entry.done ? 'done' : ''}`} onClick={() => toggleShopping(entry.id)} />
+                          <div>
+                            <div className={`title ${entry.done ? 'done-text' : ''}`}>{entry.title}</div>
+                            <div className="chips"><span className="chip">{entry.priority}</span><span className="chip dark">{entry.buyer}</span><span className="chip">{formatCurrency(entry.estimatedPrice)}</span></div>
+                          </div>
+                        </div>
+                        <button className="delete" onClick={() => deleteShopping(entry.id)}>🗑️</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {tab === 'inventory' && (
+              <section className="tab-panel active">
+                <div className="card section">
+                  <div className="toolbar">
+                    <div><h3>Bestandsübersicht mit Preisen</h3><div className="desc">Filterbar nach Produkt oder Kategorie</div></div>
+                    <button className="btn" onClick={() => setInventoryFormOpen(v => !v)}>+ Produkt</button>
+                  </div>
+                  {inventoryFormOpen && (
+                    <div className="form-card" style={{ marginBottom: 14 }}>
+                      <div className="grid" style={{ gap: 10 }}>
+                        <input className="input" placeholder="Produktname" value={inventoryForm.name} onChange={e => setInventoryForm({ ...inventoryForm, name: e.target.value })} />
+                        <input className="input" placeholder="Kategorie" value={inventoryForm.category} onChange={e => setInventoryForm({ ...inventoryForm, category: e.target.value })} />
+                        <div className="row-2">
+                          <input className="input" type="number" step="0.01" placeholder="Preis" value={inventoryForm.price} onChange={e => setInventoryForm({ ...inventoryForm, price: e.target.value })} />
+                          <input className="input" type="number" placeholder="Bestand" value={inventoryForm.stock} onChange={e => setInventoryForm({ ...inventoryForm, stock: e.target.value })} />
+                        </div>
+                        <div className="row-2">
+                          <input className="input" type="number" placeholder="Mindestbestand" value={inventoryForm.minStock} onChange={e => setInventoryForm({ ...inventoryForm, minStock: e.target.value })} />
+                          <select className="select" value={inventoryForm.assignee} onChange={e => setInventoryForm({ ...inventoryForm, assignee: e.target.value })}>
+                            {teamMembers.map(member => <option key={member}>{member}</option>)}
+                          </select>
+                        </div>
+                        <button className="btn" onClick={addInventoryItem}>Produkt anlegen</button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="search-row">
+                    <input className="input" placeholder="Suche nach Produkten oder Kategorien" value={search} onChange={e => setSearch(e.target.value)} />
+                  </div>
+                  <div className="list" style={{ marginTop: 12 }}>
+                    {filteredItems.map(item => {
+                      const status = getStatus(item)
+                      return (
+                        <div className="product" key={item.id}>
+                          <img src={item.image} alt={item.name} />
+                          <div>
+                            <div className="product-head">
+                              <div><div className="title">{item.name}</div><div className="small">{item.category}</div></div>
+                              <div className={`status ${status.cls}`}>{status.label}</div>
+                            </div>
+                            <div className="meta">
+                              <div>Preis: <strong>{formatCurrency(item.price)}</strong></div>
+                              <div>Bestand: <strong>{item.stock}</strong></div>
+                              <div>Min: <strong>{item.minStock}</strong></div>
+                              <div>Owner: <strong>{item.assignee}</strong></div>
+                            </div>
+                            <div className="chips">{item.sharedWith.map(person => <span className="chip" key={person}>{person}</span>)}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {tab === 'uploads' && (
+              <section className="tab-panel active">
+                <div className="card section">
+                  <h3>Foto-Upload &amp; Belege</h3>
+                  <div className="desc">Belege, Inventarfotos, Preisangebote gemeinsam speichern</div>
+                  <label className="upload-drop" style={{ marginTop: 14, display: 'block', cursor: 'pointer' }}>
+                    📸 Datei auswählen
+                    <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
+                  </label>
+                  {uploadPreview && (
+                    <div className="upload-item" style={{ marginTop: 14 }}>
+                      <div>
+                        <img src={uploadPreview.image} alt="preview" style={{ maxWidth: 100, borderRadius: 8 }} />
+                        <div style={{ marginTop: 8 }}>
+                          <div className="title">{uploadPreview.name}</div>
+                          <div className="small">{uploadPreview.size}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="list" style={{ marginTop: 16 }}>
+                    {uploads.map(item => (
+                      <div className="upload-item" key={item.id}>
+                        <div>
+                          <div className="title">{item.title}</div>
+                          <div className="chips"><span className="chip">{item.type}</span><span className="chip dark">{item.by}</span><span className="chip">{item.date}</span></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+  </script>
+</body>
+</html>
