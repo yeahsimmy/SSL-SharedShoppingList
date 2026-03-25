@@ -7,18 +7,18 @@
   <script src="https://unpkg.com/chart.js"></script>
   <style>
     :root{
-      --bg:#f3f4f6;--card:#ffffff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;
-      --dark:#0f172a;--dark2:#334155;--soft:#f8fafc;--ok:#dcfce7;--warn:#fef3c7;
+      --bg:#f1f5ff;--card:#ffffff;--text:#111827;--muted:#6b7280;--border:#dbe4ff;
+      --dark:#3730a3;--dark2:#7c3aed;--soft:#f8fafc;--ok:#dcfce7;--warn:#fef3c7;
       --danger:#fee2e2;--ok-text:#166534;--warn-text:#92400e;--danger-text:#991b1b;
-      --shadow:0 10px 30px rgba(15,23,42,.10);--radius:24px;
+      --shadow:0 14px 34px rgba(76, 29, 149, .15);--radius:24px;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg);color:var(--text);}
+      background:radial-gradient(circle at top right,#fdf4ff 0,#eef2ff 36%,#f1f5ff 100%);color:var(--text);}
     button,input,select{font:inherit}
     .app{max-width:1400px;margin:0 auto;padding:16px}
-    .phone{background:#fff;border:1px solid var(--border);border-radius:32px;
-      box-shadow:0 20px 60px rgba(15,23,42,.12);padding:14px;min-height:100vh;}
+    .phone{background:linear-gradient(180deg,#ffffff 0,#f8faff 100%);border:1px solid var(--border);border-radius:32px;
+      box-shadow:0 20px 60px rgba(76, 29, 149, .12);padding:14px;min-height:100vh;}
     .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px}
     .hamburger{display:none;background:none;border:none;font-size:24px;cursor:pointer;padding:8px;margin:-8px -8px -8px 0}
     .header h1{margin:0;font-size:24px;flex:1}
@@ -30,7 +30,7 @@
     .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
     .tab-btn{border:none;background:#f8fafc;border-radius:14px;padding:12px;cursor:pointer;font-weight:600;
       border:1px solid var(--border);transition:all .2s}
-    .tab-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+    .tab-btn.active{background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff;border-color:transparent}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
     .grid{display:grid;gap:12px}
@@ -60,12 +60,15 @@
     .badge.urgent{background:#fee2e2;color:#991b1b}
     .badge.market{background:#dbeafe;color:#1e40af}
     .badge.drugstore{background:#dcfce7;color:#166534}
+    .item-photo{width:46px;height:46px;border-radius:10px;object-fit:cover;border:1px solid var(--border)}
+    .photo-placeholder{width:46px;height:46px;border-radius:10px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px}
+    .member-actions{display:flex;gap:8px;align-items:center}
     .input,.select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;
       background:#fff}
     .input:focus,.select:focus{outline:none;border-color:var(--dark)}
-    .btn{border:none;background:var(--dark);color:#fff;padding:10px 16px;border-radius:12px;
+    .btn{border:none;background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff;padding:10px 16px;border-radius:12px;
       cursor:pointer;font-weight:600;transition:background .2s}
-    .btn:hover{background:var(--dark2)}
+    .btn:hover{opacity:.92}
     .btn.secondary{background:#e2e8f0;color:var(--text)}
     .btn.secondary:hover{background:#cbd5e1}
     .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
@@ -100,15 +103,15 @@
   <script type="text/babel">
     const { useState, useMemo, useEffect, useRef } = React;
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbxQ7SZIkWJf_f5g5Pw9VBiKeCoj7du-Cl6V5OGrkYukB32O1bkvMKsRu5etbeyiDe3hig/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzRpoMgGJSLW1aw8tvS0oxYql-fMXOIrg66vN8ShgfwMBoy3F5TtO9usBejfQLBe9sjnA/exec";
 
     const initialData = {
       teamMembers: ["Yesim", "Alex", "Mina"],
       budget: { total: 500, currency: "EUR", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) },
       shoppingList: [
-        { id: 1, title: "Milk", price: 3.99, buyer: "Yesim", category: "market", priority: "normal", done: false, paidBy: null, addedBy: "Alex", date: new Date().toISOString(), isFavorite: false, recurring: false },
-        { id: 2, title: "Bread", price: 2.50, buyer: "Mina", category: "market", priority: "urgent", done: false, paidBy: null, addedBy: "Yesim", date: new Date().toISOString(), isFavorite: true, recurring: false },
-        { id: 3, title: "Shampoo", price: 8.99, buyer: "Yesim", category: "drugstore", priority: "normal", done: false, paidBy: null, addedBy: "Mina", date: new Date().toISOString(), isFavorite: false, recurring: true }
+        { id: 1, title: "Milk", price: 3.99, buyer: "Yesim", category: "market", priority: "normal", done: false, paidBy: null, addedBy: "Alex", date: new Date().toISOString(), isFavorite: false, recurring: false, photo: "" },
+        { id: 2, title: "Bread", price: 2.50, buyer: "Mina", category: "market", priority: "urgent", done: false, paidBy: null, addedBy: "Yesim", date: new Date().toISOString(), isFavorite: true, recurring: false, photo: "" },
+        { id: 3, title: "Shampoo", price: 8.99, buyer: "Yesim", category: "drugstore", priority: "normal", done: false, paidBy: null, addedBy: "Mina", date: new Date().toISOString(), isFavorite: false, recurring: true, photo: "" }
       ],
       completed: [
         { id: 101, title: "Coffee", price: 5.99, buyer: "Alex", paidBy: "Alex", quantity: 1, date: "2024-03-20", category: "market" },
@@ -116,12 +119,39 @@
       ]
     };
 
-    async function callApi(action, data) {
+    function parseBool(value) {
+      return value === true || value === "true" || value === 1 || value === "1";
+    }
+
+    function normalizeData(rawData) {
+      return {
+        teamMembers: Array.isArray(rawData?.teamMembers) && rawData.teamMembers.length ? rawData.teamMembers : initialData.teamMembers,
+        budget: rawData?.budget || initialData.budget,
+        shoppingList: (rawData?.shoppingList || []).map(item => ({
+          ...item,
+          id: Number(item.id) || Date.now(),
+          price: Number(item.price) || 0,
+          done: parseBool(item.done),
+          isFavorite: parseBool(item.isFavorite),
+          recurring: parseBool(item.recurring),
+          photo: item.photo || ""
+        })),
+        completed: (rawData?.completed || []).map(item => ({
+          ...item,
+          id: Number(item.id) || Date.now(),
+          price: Number(item.price) || 0
+        }))
+      };
+    }
+
+    async function callApi(action, data = {}) {
       try {
-        const response = await fetch(`${API_URL}?action=${action}`, {
+        const formData = new URLSearchParams();
+        formData.set("action", action);
+        formData.set("payload", JSON.stringify(data));
+        const response = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' }
+          body: formData
         });
         return await response.json();
       } catch (err) {
@@ -167,13 +197,16 @@
     function App() {
       const [tab, setTab] = useState('dashboard');
       const [data, setData] = useState(initialData);
-      const [filters, setFilters] = useState({ priority: 'all', category: 'all' });
-      const [newItem, setNewItem] = useState({ title: '', price: '', buyer: 'Yesim', category: 'market', priority: 'normal' });
+      const [newItem, setNewItem] = useState({ title: '', price: '', buyer: 'Yesim', category: 'market', priority: 'normal', photo: '' });
       const [filterChip, setFilterChip] = useState('all');
+      const [newMemberName, setNewMemberName] = useState('');
 
       useEffect(() => {
-        // Optionally load from API
-        console.log('App initialized');
+        callApi('getData', {}).then(res => {
+          if (res.success && res.data) {
+            setData(normalizeData(res.data));
+          }
+        });
       }, []);
 
       const spending = useMemo(() => {
@@ -213,11 +246,13 @@
           addedBy: 'Yesim',
           date: new Date().toISOString(),
           isFavorite: false,
-          recurring: false
+          recurring: false,
+          photo: newItem.photo || ""
         };
-        callApi('addShoppingItem', item).then(() => {
+        callApi('addShoppingItem', item).then((res) => {
+          if (!res.success) return;
           setData({ ...data, shoppingList: [...data.shoppingList, item] });
-          setNewItem({ title: '', price: '', buyer: 'Yesim', category: 'market', priority: 'normal' });
+          setNewItem({ title: '', price: '', buyer: data.teamMembers[0] || 'Yesim', category: 'market', priority: 'normal', photo: '' });
         });
       }
 
@@ -253,6 +288,94 @@
             i.id === id ? { ...i, isFavorite: !i.isFavorite } : i
           )
         });
+      }
+
+      function editItem(id) {
+        const existing = data.shoppingList.find(i => i.id === id);
+        if (!existing) return;
+        const title = prompt('Item name', existing.title);
+        if (!title || !title.trim()) return;
+        const priceInput = prompt('Price', String(existing.price));
+        if (priceInput === null) return;
+        const price = Number(priceInput);
+        if (!Number.isFinite(price) || price < 0) return;
+        const updated = { ...existing, title: title.trim(), price };
+        callApi('updateShoppingItem', updated).then((res) => {
+          if (!res.success) return;
+          setData({
+            ...data,
+            shoppingList: data.shoppingList.map(i => i.id === id ? updated : i)
+          });
+        });
+      }
+
+      function addMember() {
+        const value = newMemberName.trim();
+        if (!value || data.teamMembers.includes(value)) return;
+        callApi('addMember', { member: value }).then((res) => {
+          if (!res.success) return;
+          setData({ ...data, teamMembers: [...data.teamMembers, value] });
+          setNewMemberName('');
+        });
+      }
+
+      function renameMember(oldName) {
+        const next = prompt('Rename member', oldName);
+        if (!next || !next.trim() || next.trim() === oldName) return;
+        const newName = next.trim();
+        callApi('renameMember', { oldName, newName }).then((res) => {
+          if (!res.success) return;
+          setData({
+            ...data,
+            teamMembers: data.teamMembers.map(m => m === oldName ? newName : m),
+            shoppingList: data.shoppingList.map(i => i.buyer === oldName ? { ...i, buyer: newName } : i),
+            completed: data.completed.map(i => ({
+              ...i,
+              buyer: i.buyer === oldName ? newName : i.buyer,
+              paidBy: i.paidBy === oldName ? newName : i.paidBy
+            }))
+          });
+        });
+      }
+
+      function removeMember(name) {
+        if (!confirm(`Delete member "${name}"?`)) return;
+        callApi('removeMember', { member: name }).then((res) => {
+          if (!res.success) return;
+          const fallback = data.teamMembers.find(m => m !== name) || "Unassigned";
+          setData({
+            ...data,
+            teamMembers: data.teamMembers.filter(m => m !== name),
+            shoppingList: data.shoppingList.map(i => i.buyer === name ? { ...i, buyer: fallback } : i),
+            completed: data.completed.map(i => ({
+              ...i,
+              buyer: i.buyer === name ? fallback : i.buyer,
+              paidBy: i.paidBy === name ? fallback : i.paidBy
+            }))
+          });
+        });
+      }
+
+      function uploadPhoto(file, itemId = null) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const photo = String(reader.result || '');
+          if (itemId === null) {
+            setNewItem(prev => ({ ...prev, photo }));
+            return;
+          }
+          const updated = data.shoppingList.find(i => i.id === itemId);
+          if (!updated) return;
+          const nextItem = { ...updated, photo };
+          callApi('updateShoppingItem', nextItem).then((res) => {
+            if (!res.success) return;
+            setData({
+              ...data,
+              shoppingList: data.shoppingList.map(i => i.id === itemId ? nextItem : i)
+            });
+          });
+        };
+        reader.readAsDataURL(file);
       }
 
       return (
@@ -376,6 +499,12 @@
                       <option value="urgent">Urgent</option>
                       <option value="today">Today</option>
                     </select>
+                    <input className="input" style={{gridColumn: 'span 2'}} type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
+                    {newItem.photo && (
+                      <div style={{gridColumn: 'span 2'}}>
+                        <img src={newItem.photo} alt="Preview" className="item-photo" />
+                      </div>
+                    )}
                   </div>
                   <button className="btn" style={{width: '100%', marginTop: 12}} onClick={addShoppingItem}>Add Item</button>
                 </div>
@@ -393,6 +522,7 @@
                     {filteredList.map(item => (
                       <div key={item.id} className={`item ${item.priority === 'urgent' ? 'urgent' : ''}`}>
                         <div className="item-left">
+                          {item.photo ? <img src={item.photo} alt={item.title} className="item-photo" /> : <div className="photo-placeholder">IMG</div>}
                           <input type="checkbox" onChange={() => completeItem(item.id)} />
                           <div className="item-info">
                             <div className="item-title">{item.title}{item.isFavorite ? ' ⭐' : ''}</div>
@@ -405,6 +535,11 @@
                         </div>
                         <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
                           <strong>€{item.price}</strong>
+                          <label className="btn secondary" style={{padding: '4px 8px', fontSize: 12, cursor: 'pointer'}}>
+                            📷
+                            <input type="file" accept="image/*" style={{display: 'none'}} onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0], item.id)} />
+                          </label>
+                          <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => editItem(item.id)}>✏️</button>
                           <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => toggleFavorite(item.id)}>⭐</button>
                           <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => deleteItem(item.id)}>🗑️</button>
                         </div>
@@ -470,12 +605,20 @@
               <div className="tab-panel active">
                 <div className="section">
                   <h3>Team Members</h3>
+                  <div className="toolbar">
+                    <input className="input" placeholder="Add member name" value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} />
+                    <button className="btn" onClick={addMember}>Add</button>
+                  </div>
                   <div className="list">
                     {data.teamMembers.map(member => (
                       <div key={member} className="item">
                         <div className="item-info">
                           <div className="item-title">{member}</div>
                           <div className="item-meta">Spent: €{(spending[member] || 0).toFixed(2)}</div>
+                        </div>
+                        <div className="member-actions">
+                          <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => renameMember(member)}>Rename</button>
+                          <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => removeMember(member)}>Delete</button>
                         </div>
                       </div>
                     ))}

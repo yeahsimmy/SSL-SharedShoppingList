@@ -12,10 +12,29 @@ const SHEET_NAMES = {
   budget: "Budget"
 };
 
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) || "";
+  if (action === "getData") {
+    return ContentService.createTextOutput(JSON.stringify(getData()))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ 
+    success: true, 
+    message: "Smart Household Budget API running" 
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
-    const action = e.parameter.action;
+    const bodyText = (e && e.postData && e.postData.contents) ? e.postData.contents : "";
+    const payloadParam = (e && e.parameter && e.parameter.payload) ? e.parameter.payload : "";
+    const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "";
+    let data = {};
+    if (payloadParam) {
+      data = JSON.parse(payloadParam);
+    } else if (bodyText) {
+      data = JSON.parse(bodyText);
+    }
 
     Logger.log("Action: " + action);
     Logger.log("Data: " + JSON.stringify(data));
@@ -34,6 +53,18 @@ function doPost(e) {
         break;
       case 'deleteItem':
         result = deleteItem(data);
+        break;
+      case 'updateShoppingItem':
+        result = updateShoppingItem(data);
+        break;
+      case 'addMember':
+        result = addMember(data);
+        break;
+      case 'renameMember':
+        result = renameMember(data);
+        break;
+      case 'removeMember':
+        result = removeMember(data);
         break;
       default:
         result = { success: false, error: "Unknown action" };
@@ -106,7 +137,8 @@ function addShoppingItem(item) {
       new Date().toISOString(),
       item.isFavorite ? 1 : 0,
       item.recurring ? 1 : 0,
-      "false" // done status
+      "false", // done status
+      item.photo || ""
     ];
 
     sheet.appendRow(row);
@@ -187,6 +219,116 @@ function deleteItem(item) {
   }
 }
 
+function updateShoppingItem(item) {
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAMES.shoppingList);
+    if (!sheet) return { success: false, error: "ShoppingList sheet not found" };
+    const values = sheet.getDataRange().getValues();
+    if (!values.length) return { success: false, error: "ShoppingList is empty" };
+    const headers = values[0].map(h => String(h).toLowerCase());
+    const rowIndex = values.findIndex((row, idx) => idx > 0 && String(row[0]) === String(item.id));
+    if (rowIndex === -1) return { success: false, error: "Item not found" };
+    const existing = values[rowIndex];
+    const next = [];
+    for (let i = 0; i < headers.length; i++) {
+      const key = headers[i];
+      next.push(item[key] !== undefined ? item[key] : existing[i]);
+    }
+    sheet.getRange(rowIndex + 1, 1, 1, next.length).setValues([next]);
+    return { success: true, message: "Item updated" };
+  } catch (e) {
+    Logger.log("updateShoppingItem ERROR: " + e.toString());
+    return { success: false, error: e.toString() };
+  }
+}
+
+function addMember(payload) {
+  try {
+    const member = (payload.member || "").toString().trim();
+    if (!member) return { success: false, error: "Member name required" };
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAMES.teamMembers);
+    if (!sheet) return { success: false, error: "TeamMembers sheet not found" };
+    const names = getMembersData(sheet);
+    if (names.indexOf(member) !== -1) return { success: true, message: "Member already exists" };
+    sheet.appendRow([member]);
+    return { success: true, message: "Member added" };
+  } catch (e) {
+    Logger.log("addMember ERROR: " + e.toString());
+    return { success: false, error: e.toString() };
+  }
+}
+
+function renameMember(payload) {
+  try {
+    const oldName = (payload.oldName || "").toString().trim();
+    const newName = (payload.newName || "").toString().trim();
+    if (!oldName || !newName) return { success: false, error: "Both oldName and newName are required" };
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const membersSheet = ss.getSheetByName(SHEET_NAMES.teamMembers);
+    if (!membersSheet) return { success: false, error: "TeamMembers sheet not found" };
+    const data = membersSheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === oldName) {
+        membersSheet.getRange(i + 1, 1).setValue(newName);
+        break;
+      }
+    }
+    replaceMemberNameInSheet(ss.getSheetByName(SHEET_NAMES.shoppingList), oldName, newName, ["buyer", "addedby"]);
+    replaceMemberNameInSheet(ss.getSheetByName(SHEET_NAMES.completed), oldName, newName, ["buyer", "paidby"]);
+    return { success: true, message: "Member renamed" };
+  } catch (e) {
+    Logger.log("renameMember ERROR: " + e.toString());
+    return { success: false, error: e.toString() };
+  }
+}
+
+function removeMember(payload) {
+  try {
+    const member = (payload.member || "").toString().trim();
+    if (!member) return { success: false, error: "Member name required" };
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const membersSheet = ss.getSheetByName(SHEET_NAMES.teamMembers);
+    if (!membersSheet) return { success: false, error: "TeamMembers sheet not found" };
+    const data = membersSheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === member) {
+        membersSheet.deleteRow(i + 1);
+        break;
+      }
+    }
+    return { success: true, message: "Member removed" };
+  } catch (e) {
+    Logger.log("removeMember ERROR: " + e.toString());
+    return { success: false, error: e.toString() };
+  }
+}
+
+function replaceMemberNameInSheet(sheet, oldName, newName, columns) {
+  if (!sheet) return;
+  const values = sheet.getDataRange().getValues();
+  if (!values.length) return;
+  const headers = values[0].map(h => String(h).toLowerCase());
+  const columnIndexes = headers
+    .map((h, i) => columns.indexOf(h) !== -1 ? i : -1)
+    .filter(i => i !== -1);
+  if (!columnIndexes.length) return;
+  for (let row = 1; row < values.length; row++) {
+    let changed = false;
+    for (let c = 0; c < columnIndexes.length; c++) {
+      const idx = columnIndexes[c];
+      if (String(values[row][idx]).trim() === oldName) {
+        values[row][idx] = newName;
+        changed = true;
+      }
+    }
+    if (changed) {
+      sheet.getRange(row + 1, 1, 1, values[row].length).setValues([values[row]]);
+    }
+  }
+}
+
 function getSheetData(sheet) {
   try {
     const data = sheet.getDataRange().getValues();
@@ -258,7 +400,7 @@ function setupSheets() {
     
     // Create ShoppingList sheet
     createSheetIfNotExists(ss, SHEET_NAMES.shoppingList, [
-      "id", "title", "price", "buyer", "category", "priority", "addedBy", "date", "isFavorite", "recurring", "done"
+      "id", "title", "price", "buyer", "category", "priority", "addedBy", "date", "isFavorite", "recurring", "done", "photo"
     ]);
     
     // Create Completed sheet
