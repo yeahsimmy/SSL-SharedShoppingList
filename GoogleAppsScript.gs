@@ -97,6 +97,8 @@ function getData() {
       };
     }
 
+    ensureShoppingPhotoColumn(shoppingSheet);
+
     const shoppingList = getSheetData(shoppingSheet);
     const completed = getSheetData(completedSheet);
     const teamMembers = getMembersData(membersSheet);
@@ -125,6 +127,7 @@ function addShoppingItem(item) {
     if (!sheet) {
       return { success: false, error: "ShoppingList sheet not found" };
     }
+    ensureShoppingPhotoColumn(sheet);
 
     const row = [
       item.id || Date.now(),
@@ -224,6 +227,7 @@ function updateShoppingItem(item) {
     const ss = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ss.getSheetByName(SHEET_NAMES.shoppingList);
     if (!sheet) return { success: false, error: "ShoppingList sheet not found" };
+    ensureShoppingPhotoColumn(sheet);
     const values = sheet.getDataRange().getValues();
     if (!values.length) return { success: false, error: "ShoppingList is empty" };
     const headers = values[0].map(h => String(h).toLowerCase());
@@ -329,10 +333,21 @@ function replaceMemberNameInSheet(sheet, oldName, newName, columns) {
   }
 }
 
+function ensureShoppingPhotoColumn(sheet) {
+  const lastColumn = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(h => String(h).toLowerCase().trim());
+  if (headers.indexOf("photo") === -1) {
+    sheet.getRange(1, lastColumn + 1).setValue("photo");
+  }
+}
+
 function getSheetData(sheet) {
   try {
     const data = sheet.getDataRange().getValues();
     const headers = data[0];
+    const normalizedHeaders = headers.map(h => String(h).toLowerCase().trim());
+    const isShoppingSheet = normalizedHeaders.indexOf("title") !== -1 && normalizedHeaders.indexOf("buyer") !== -1;
+    const photoHeaderIndex = normalizedHeaders.indexOf("photo");
     const rows = [];
 
     for (let i = 1; i < data.length; i++) {
@@ -342,6 +357,11 @@ function getSheetData(sheet) {
       headers.forEach((header, idx) => {
         row[header.toLowerCase()] = data[i][idx];
       });
+      if (isShoppingSheet && photoHeaderIndex === -1 && data[i].length > headers.length) {
+        row.photo = data[i][headers.length] || "";
+      } else if (isShoppingSheet && photoHeaderIndex !== -1) {
+        row.photo = data[i][photoHeaderIndex] || "";
+      }
       rows.push(row);
     }
 
