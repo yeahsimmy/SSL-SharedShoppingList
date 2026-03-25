@@ -109,17 +109,10 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyXq05L594ZlpeuFuuTvf85PrZgOC7qXU2AcG-yjxaQAjZtGwM2NKtIz4DWbhLql0VfVg/exec";
 
     const initialData = {
-      teamMembers: ["Yesim", "Alex", "Mina"],
+      teamMembers: [],
       budget: { total: 500, currency: "EUR", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) },
-      shoppingList: [
-        { id: 1, title: "Milk", price: 3.99, buyer: "Yesim", category: "market", priority: "normal", done: false, paidBy: null, addedBy: "Alex", date: new Date().toISOString(), isFavorite: false, recurring: false, photo: "" },
-        { id: 2, title: "Bread", price: 2.50, buyer: "Mina", category: "market", priority: "urgent", done: false, paidBy: null, addedBy: "Yesim", date: new Date().toISOString(), isFavorite: true, recurring: false, photo: "" },
-        { id: 3, title: "Shampoo", price: 8.99, buyer: "Yesim", category: "drugstore", priority: "normal", done: false, paidBy: null, addedBy: "Mina", date: new Date().toISOString(), isFavorite: false, recurring: true, photo: "" }
-      ],
-      completed: [
-        { id: 101, title: "Coffee", price: 5.99, buyer: "Alex", paidBy: "Alex", quantity: 1, date: "2024-03-20", category: "market" },
-        { id: 102, title: "Vegetables", price: 12.50, buyer: "Yesim", paidBy: "Alex", quantity: 1, date: "2024-03-20", category: "market" }
-      ]
+      shoppingList: [],
+      completed: []
     };
 
     function parseBool(value) {
@@ -198,18 +191,24 @@
     function App() {
       const [tab, setTab] = useState('dashboard');
       const [data, setData] = useState(initialData);
-      const [newItem, setNewItem] = useState({ title: '', price: '', buyer: 'Yesim', category: 'market', priority: 'normal', photo: '' });
+      const [newItem, setNewItem] = useState({ title: '', price: '', buyer: '', category: 'market', priority: 'normal', photo: '' });
       const [filterChip, setFilterChip] = useState('all');
       const [newMemberName, setNewMemberName] = useState('');
       const [previewImage, setPreviewImage] = useState('');
+      const [isLoading, setIsLoading] = useState(true);
 
       useEffect(() => {
         callApi('getData', {}).then(res => {
           if (res.success && res.data) {
             setData(normalizeData(res.data));
           }
-        });
+        }).finally(() => setIsLoading(false));
       }, []);
+
+      useEffect(() => {
+        if (!data.teamMembers.length) return;
+        setNewItem(prev => ({ ...prev, buyer: prev.buyer || data.teamMembers[0] }));
+      }, [data.teamMembers]);
 
       const spending = useMemo(() => {
         const totals = {};
@@ -235,7 +234,7 @@
       }, [data.shoppingList, filterChip]);
 
       function addShoppingItem() {
-        if (!newItem.title.trim() || !newItem.price) return;
+        if (!newItem.title.trim() || !newItem.price || !newItem.buyer) return;
         const item = {
           id: Date.now(),
           title: newItem.title,
@@ -442,8 +441,13 @@
                 </button>
               ))}
             </div>
+            {isLoading && (
+              <div className="section" style={{ marginBottom: 16 }}>
+                <h3>Loading data...</h3>
+              </div>
+            )}
 
-            {tab === 'dashboard' && (
+            {!isLoading && tab === 'dashboard' && (
               <div className="tab-panel active">
                 <div className="grid grid-4">
                   <div className="kpi-card">
@@ -519,7 +523,7 @@
               </div>
             )}
 
-            {tab === 'shopping' && (
+            {!isLoading && tab === 'shopping' && (
               <div className="tab-panel active">
                 <div className="section">
                   <h3>Add New Item</h3>
@@ -590,7 +594,7 @@
               </div>
             )}
 
-            {tab === 'history' && (
+            {!isLoading && tab === 'history' && (
               <div className="tab-panel active">
                 <div className="section">
                   <h3>Completed Purchases</h3>
@@ -611,7 +615,7 @@
               </div>
             )}
 
-            {tab === 'budget' && (
+            {!isLoading && tab === 'budget' && (
               <div className="tab-panel active">
                 <div className="section">
                   <h3>Budget Status</h3>
@@ -641,7 +645,7 @@
               </div>
             )}
 
-            {tab === 'members' && (
+            {!isLoading && tab === 'members' && (
               <div className="tab-panel active">
                 <div className="section">
                   <h3>Team Members</h3>
@@ -667,7 +671,7 @@
               </div>
             )}
 
-            {tab === 'summary' && (
+            {!isLoading && tab === 'summary' && (
               <div className="tab-panel active">
                 <div className="section">
                   <h3>Monthly Summary</h3>
