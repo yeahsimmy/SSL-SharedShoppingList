@@ -146,12 +146,10 @@
 
     async function callApi(action, data = {}) {
       try {
-        const formData = new URLSearchParams();
-        formData.set("action", action);
-        formData.set("payload", JSON.stringify(data));
-        const response = await fetch(API_URL, {
+        const response = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(data)
         });
         return await response.json();
       } catch (err) {
