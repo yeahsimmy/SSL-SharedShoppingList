@@ -3,313 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shared Shopping List</title>
+  <title>Smart Household Budget</title>
+  <script src="https://unpkg.com/chart.js"></script>
   <style>
     :root{
-      --bg:#f3f4f6;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-      --dark:#0f172a;
-      --dark2:#334155;
-      --soft:#f8fafc;
-      --ok:#dcfce7;
-      --warn:#fef3c7;
-      --danger:#fee2e2;
-      --ok-text:#166534;
-      --warn-text:#92400e;
-      --danger-text:#991b1b;
-      --shadow:0 10px 30px rgba(15,23,42,.10);
-      --radius:24px;
+      --bg:#f3f4f6;--card:#ffffff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;
+      --dark:#0f172a;--dark2:#334155;--soft:#f8fafc;--ok:#dcfce7;--warn:#fef3c7;
+      --danger:#fee2e2;--ok-text:#166534;--warn-text:#92400e;--danger-text:#991b1b;
+      --shadow:0 10px 30px rgba(15,23,42,.10);--radius:24px;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);color:var(--text);}
     button,input,select{font:inherit}
-    .app{max-width:1200px;margin:0 auto;padding:16px}
-    .phone{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:32px;
-      box-shadow:0 20px 60px rgba(15,23,42,.12);
-      padding:14px;
-      min-height:100vh;
-    }
-    .hero{
-      background:linear-gradient(135deg,var(--dark),var(--dark2));
-      color:#fff;
-      border-radius:26px;
-      padding:20px;
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:flex-start;
-    }
-    .hero h1{margin:6px 0 8px 0;font-size:30px;line-height:1.1}
-    .hero p{margin:0}
-    .hero .sub{color:#cbd5e1;font-size:14px}
-    .badge{
-      padding:8px 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.12);
-      white-space:nowrap;
-      font-size:12px;
-      border:1px solid rgba(255,255,255,.16);
-    }
-    .grid{display:grid;gap:12px}
-    .metrics{grid-template-columns:repeat(4,1fr);margin-top:14px}
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-    }
-    .card.empty-item{
-      border-color:#dc2626;
-      background:#fee2e2;
-    }
-    .metric{
-      padding:16px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .metric .label{font-size:12px;color:var(--muted)}
-    .metric .value{font-size:20px;font-weight:700;margin-top:4px}
-    .icon{
-      width:40px;height:40px;border-radius:16px;
-      display:grid;place-items:center;background:#f1f5f9;font-size:18px;
-    }
-    .header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:16px;
-    }
-    .hamburger{
-      display:none;
-      background:none;
-      border:none;
-      font-size:24px;
-      cursor:pointer;
-      padding:8px;
-      margin:-8px -8px -8px 0;
-    }
-    .hamburger.open{
-      color:#111827;
-    }
-    .mobile-nav{
-      display:none;
-      position:fixed;
-      top:0;
-      left:0;
-      right:0;
-      bottom:0;
-      background:rgba(0,0,0,.5);
-      z-index:999;
-    }
-    .mobile-nav.open{
-      display:block;
-    }
-    .mobile-menu{
-      position:fixed;
-      top:0;
-      left:0;
-      width:70%;
-      max-width:280px;
-      height:100vh;
-      background:#fff;
-      z-index:1000;
-      overflow-y:auto;
-      padding:16px;
-      transform:translateX(-100%);
-      transition:transform .3s ease;
-    }
-    .mobile-menu.open{
-      transform:translateX(0);
-    }
-    .mobile-menu-close{
-      background:none;
-      border:none;
-      font-size:24px;
-      cursor:pointer;
-      float:right;
-      padding:4px 8px;
-      margin:-8px -8px 16px 0;
-    }
-    .mobile-menu-item{
-      display:block;
-      width:100%;
-      border:none;
-      background:transparent;
-      padding:14px;
-      text-align:left;
-      cursor:pointer;
-      font-size:16px;
-      font-weight:500;
-      color:var(--text);
-      border-radius:12px;
-      margin-bottom:8px;
-      transition:background .2s;
-    }
-    .mobile-menu-item:active,.mobile-menu-item:hover{
-      background:var(--soft);
-    }
-    .mobile-menu-item.active{
-      background:var(--dark);
-      color:#fff;
-    }
-    .tabs{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:8px;
-      background:#f8fafc;
-      border:1px solid var(--border);
-      padding:8px;
-      border-radius:20px;
-      margin-top:16px;
-    }
-    .bottom-nav{
-      display:none;
-      position:fixed;
-      bottom:0;
-      left:0;
-      right:0;
-      background:#fff;
-      border-top:1px solid var(--border);
-      padding:8px;
-      z-index:100;
-      grid-template-columns:repeat(3,1fr);
-      gap:4px;
-    }
-    .bottom-nav.open{
-      display:grid;
-    }
-    .tab-btn{
-      border:none;
-      background:transparent;
-      border-radius:14px;
-      padding:12px;
-      font-weight:600;
-      cursor:pointer;
-    }
-    .tab-btn.active{
-      background:#fff;
-      box-shadow:var(--shadow);
-    }
-    .bottom-nav .tab-btn{
-      padding:10px;
-      font-weight:400;
-      border-radius:12px;
-    }
-    .bottom-nav .tab-btn.active{
-      background:var(--dark);
-      color:#fff;
-      box-shadow:none;
-    }
-    .tab-panel{margin-top:16px;display:none}
+    .app{max-width:1400px;margin:0 auto;padding:16px}
+    .phone{background:#fff;border:1px solid var(--border);border-radius:32px;
+      box-shadow:0 20px 60px rgba(15,23,42,.12);padding:14px;min-height:100vh;}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px}
+    .hamburger{display:none;background:none;border:none;font-size:24px;cursor:pointer;padding:8px;margin:-8px -8px -8px 0}
+    .header h1{margin:0;font-size:24px;flex:1}
+    .header-info{font-size:12px;color:var(--muted);text-align:right}
+    .hero{background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff;border-radius:26px;
+      padding:20px;margin-bottom:20px;}
+    .hero h2{margin:6px 0;font-size:24px}
+    .hero p{margin:0;color:#cbd5e1;font-size:14px}
+    .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
+    .tab-btn{border:none;background:#f8fafc;border-radius:14px;padding:12px;cursor:pointer;font-weight:600;
+      border:1px solid var(--border);transition:all .2s}
+    .tab-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+    .tab-panel{display:none}
     .tab-panel.active{display:block}
-    .section{padding:18px}
-    .section h3{margin:0 0 4px 0;font-size:16px}
-    .section .desc{color:var(--muted);font-size:14px;margin-bottom:14px}
+    .grid{display:grid;gap:12px}
+    .grid-2{grid-template-columns:1fr 1fr}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:18px}
+    .card.empty{border-color:#dc2626;background:#fee2e2}
+    .card.warning{border-color:#f59e0b;background:#fef3c7}
+    .kpi-card{padding:20px;background:linear-gradient(135deg,var(--dark),var(--dark2));
+      color:#fff;border-radius:20px;text-align:center}
+    .kpi-value{font-size:32px;font-weight:700;margin:8px 0}
+    .kpi-label{font-size:12px;color:#cbd5e1}
+    .section{padding:18px;border-radius:12px;background:var(--card);border:1px solid var(--border)}
+    .section h3{margin:0 0 12px 0;font-size:16px;font-weight:600}
     .list{display:grid;gap:12px}
-    .toolbar{
-      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap
-    }
-    .btn{
-      border:none;background:#111827;color:#fff;padding:12px 16px;border-radius:16px;
-      cursor:pointer;font-weight:600
-    }
-    .btn:hover{background:#1f2937}
-    .btn.secondary{background:#e2e8f0;color:#111827}
-    .input,.select{
-      width:100%;padding:12px 14px;border-radius:16px;border:1px solid var(--border);background:#fff
-    }
-    .input:focus,.select:focus{outline:none;border-color:#111827}
-    .row-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .shopping-item,.upload-item{
-      display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
-      padding:14px;border:1px solid var(--border);border-radius:18px
-    }
-    .shopping-item.empty-highlight{
-      border-color:#dc2626;
-      background:#fee2e2;
-    }
-    .shopping-left{display:flex;gap:12px;min-width:0;flex:1}
-    .title{font-weight:700}
-    .done-text{text-decoration:line-through;color:#94a3b8}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .chip{
-      padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#fff
-    }
-    .chip.dark{background:#eef2ff}
-    .delete{
-      border:none;background:transparent;font-size:18px;cursor:pointer;color:#64748b;padding:0;margin:0
-    }
-    .delete:hover{color:#dc2626}
-    .photo-preview{
-      max-width:100px;max-height:100px;border-radius:12px;margin-top:8px;
-    }
-    .small{font-size:12px;color:var(--muted)}
-    .member-badge{
-      padding:8px 12px;background:#eef2ff;border-radius:12px;display:flex;justify-content:space-between;align-items:center
-    }
-    .form-card{padding:16px;border:1px solid var(--border);border-radius:20px;background:#fcfcfd;margin-bottom:14px}
-    .quantity-input{width:80px}
-    .checkout-form{display:grid;gap:12px;margin-top:12px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:12px;
+      border:1px solid var(--border);border-radius:12px;gap:12px}
+    .item.urgent{border-color:#dc2626;background:rgba(220,38,38,.05)}
+    .item-left{flex:1;display:flex;gap:12px;align-items:center}
+    .item-info{flex:1}
+    .item-title{font-weight:600;font-size:14px}
+    .item-meta{font-size:12px;color:var(--muted);margin-top:4px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;
+      background:#eef2ff;color:#4f46e5;margin-right:4px}
+    .badge.urgent{background:#fee2e2;color:#991b1b}
+    .badge.market{background:#dbeafe;color:#1e40af}
+    .badge.drugstore{background:#dcfce7;color:#166534}
+    .input,.select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;
+      background:#fff}
+    .input:focus,.select:focus{outline:none;border-color:var(--dark)}
+    .btn{border:none;background:var(--dark);color:#fff;padding:10px 16px;border-radius:12px;
+      cursor:pointer;font-weight:600;transition:background .2s}
+    .btn:hover{background:var(--dark2)}
+    .btn.secondary{background:#e2e8f0;color:var(--text)}
+    .btn.secondary:hover{background:#cbd5e1}
+    .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    .chart-container{position:relative;height:300px;margin-top:16px}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;padding:12px;
+      border-bottom:1px solid var(--border)}
+    .summary-row:last-child{border-bottom:none}
+    .summary-label{font-size:14px}
+    .summary-value{font-size:14px;font-weight:600}
+    .filter-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .chip{padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:#fff;
+      cursor:pointer;font-size:12px;transition:all .2s}
+    .chip.active{background:var(--dark);color:#fff;border-color:var(--dark)}
     
     @media (max-width:768px){
-      .app{padding:12px}
-      .phone{padding:12px;border-radius:24px}
-      .hero{padding:16px;flex-direction:column;gap:12px}
-      .hero h1{font-size:24px}
-      .metrics{grid-template-columns:repeat(2,1fr)}
+      .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
       .tabs{grid-template-columns:repeat(3,1fr)}
-      .tab-btn{padding:10px;font-size:13px}
-      .section{padding:14px}
-      .row-2{grid-template-columns:1fr}
-      .toolbar{flex-direction:column;align-items:stretch}
-      .toolbar > .input,.toolbar > .select{width:100%}
-      .btn{width:100%;padding:14px}
-    }
-    
-    @media (max-width:480px){
-      .app{padding:8px}
-      .phone{padding:10px;border-radius:16px;min-height:auto;border:none;box-shadow:none;background:var(--bg);padding-bottom:80px}
       .hamburger{display:block}
-      .tabs{display:none}
-      .bottom-nav{display:grid}
-      .header{margin-bottom:12px}
-      .hero{padding:14px;border-radius:18px}
-      .hero h1{font-size:20px;margin:4px 0 6px 0}
-      .hero p{font-size:12px}
-      .badge{font-size:11px;padding:6px 10px}
-      .metrics{grid-template-columns:1fr;gap:10px;margin-top:10px}
-      .metric{padding:12px}
-      .metric .label{font-size:11px}
-      .metric .value{font-size:16px}
-      .icon{width:36px;height:36px;font-size:16px;border-radius:12px}
-      .tab-panel{margin-top:12px}
-      .section{padding:12px}
-      .section h3{font-size:14px}
-      .section .desc{font-size:12px;margin-bottom:10px}
-      .shopping-item,.upload-item{
-        flex-direction:column;
-        gap:10px;
-        padding:12px;
-      }
-      .shopping-left{width:100%}
-      .chips{gap:6px}
-      .chip{font-size:11px;padding:4px 8px}
-      .input,.select{padding:10px 12px;font-size:14px;border-radius:12px}
-      .btn{padding:12px;font-size:14px;border-radius:12px;width:100%}
-      .btn.secondary{width:auto}
-      .small{font-size:11px}
+      .header{flex-wrap:wrap}
+      .item{flex-direction:column;align-items:flex-start}
+      .kpi-value{font-size:24px}
     }
   </style>
 </head>
@@ -321,41 +98,23 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <script type="text/babel">
-    const { useState, useMemo, useEffect } = React;
+    const { useState, useMemo, useEffect, useRef } = React;
 
     const API_URL = "https://script.google.com/macros/s/AKfycbxSWtfZ_7VwomImUy610eqnXZwd8DY3cBLm7wa8DTn7jOA2lDmUbuY0XMH4iMx6lfHE/exec";
 
     const initialData = {
-      "teamMembers": ["Yesim", "Alex", "Mina"],
-      "items": [
-        {"id": 1, "name": "Milk", "price": 1.79, "stock": 1, "minStock": 2, "buyer": "Yesim"},
-        {"id": 2, "name": "Bread", "price": 2.50, "stock": 0, "minStock": 1, "buyer": "Alex"},
-        {"id": 3, "name": "Eggs", "price": 3.99, "stock": 2, "minStock": 1, "buyer": "Mina"}
+      teamMembers: ["Yesim", "Alex", "Mina"],
+      budget: { total: 500, currency: "EUR", month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }) },
+      shoppingList: [
+        { id: 1, title: "Milk", price: 3.99, buyer: "Yesim", category: "market", priority: "normal", done: false, paidBy: null, addedBy: "Alex", date: new Date().toISOString(), isFavorite: false, recurring: false },
+        { id: 2, title: "Bread", price: 2.50, buyer: "Mina", category: "market", priority: "urgent", done: false, paidBy: null, addedBy: "Yesim", date: new Date().toISOString(), isFavorite: true, recurring: false },
+        { id: 3, title: "Shampoo", price: 8.99, buyer: "Yesim", category: "drugstore", priority: "normal", done: false, paidBy: null, addedBy: "Mina", date: new Date().toISOString(), isFavorite: false, recurring: true }
       ],
-      "shoppingList": [
-        {"id": 101, "title": "Milk 2L", "priority": "High", "buyer": "Yesim", "estimatedPrice": 3.58, "done": false, "photo": null, "quantity": 0},
-        {"id": 102, "title": "Bread", "priority": "Medium", "buyer": "Mina", "estimatedPrice": 2.50, "done": false, "photo": null, "quantity": 0}
+      completed: [
+        { id: 101, title: "Coffee", price: 5.99, buyer: "Alex", paidBy: "Alex", quantity: 1, date: "2024-03-20", category: "market" },
+        { id: 102, title: "Vegetables", price: 12.50, buyer: "Yesim", paidBy: "Alex", quantity: 1, date: "2024-03-20", category: "market" }
       ]
     };
-
-    function formatCurrency(value) {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR',
-      }).format(value || 0)
-    }
-
-    async function fetchData() {
-      try {
-        const response = await fetch(`${API_URL}?action=getData`);
-        const data = await response.json();
-        console.log('Data loaded:', data);
-        return data;
-      } catch (err) {
-        console.error('Fetch error:', err);
-        return initialData;
-      }
-    }
 
     async function callApi(action, data) {
       try {
@@ -367,356 +126,394 @@
         return await response.json();
       } catch (err) {
         console.error('API error:', err);
+        return { success: false };
       }
     }
 
-    function MetricCard({ label, value, icon }) {
-      return (
-        <div className="card metric">
-          <div>
-            <div className="label">{label}</div>
-            <div className="value">{value}</div>
-          </div>
-          <div className="icon">{icon}</div>
-        </div>
-      )
+    function SpendingChart({ data }) {
+      const canvasRef = useRef(null);
+      const chartRef = useRef(null);
+
+      useEffect(() => {
+        if (!canvasRef.current) return;
+        
+        const spending = {};
+        data.forEach(item => {
+          if (item.paidBy) {
+            spending[item.paidBy] = (spending[item.paidBy] || 0) + item.price;
+          }
+        });
+
+        if (chartRef.current) chartRef.current.destroy();
+
+        chartRef.current = new Chart(canvasRef.current, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(spending),
+            datasets: [{
+              label: 'Total Spent',
+              data: Object.values(spending),
+              backgroundColor: ['#0f172a', '#334155', '#64748b'],
+              borderRadius: 8
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+      }, [data]);
+
+      return <canvas ref={canvasRef}></canvas>;
     }
 
     function App() {
-      const [tab, setTab] = useState('dashboard')
-      const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-      const [items, setItems] = useState(initialData.items)
-      const [shoppingList, setShoppingList] = useState(initialData.shoppingList)
-      const [teamMembers, setTeamMembers] = useState(initialData.teamMembers)
-      const [newMember, setNewMember] = useState('')
-      const [shoppingFormOpen, setShoppingFormOpen] = useState(false)
-      const [checkoutForm, setCheckoutForm] = useState({})
-      const [shoppingForm, setShoppingForm] = useState({
-        title: '',
-        priority: 'Medium',
-        buyer: 'Yesim',
-        estimatedPrice: '',
-        photo: null
-      })
+      const [tab, setTab] = useState('dashboard');
+      const [data, setData] = useState(initialData);
+      const [filters, setFilters] = useState({ priority: 'all', category: 'all' });
+      const [newItem, setNewItem] = useState({ title: '', price: '', buyer: 'Yesim', category: 'market', priority: 'normal' });
+      const [filterChip, setFilterChip] = useState('all');
 
       useEffect(() => {
-        fetchData().then(data => {
-          setItems(data.items || initialData.items);
-          setShoppingList(data.shoppingList || initialData.shoppingList);
-          setTeamMembers(data.teamMembers || initialData.teamMembers);
-        });
+        // Optionally load from API
+        console.log('App initialized');
       }, []);
 
-      const metrics = useMemo(() => {
-        const totalInventoryValue = items.reduce((sum, i) => sum + i.price * i.stock, 0);
-        const emptyItems = items.filter(i => i.stock === 0).length;
-        const lowStockItems = items.filter(i => i.stock <= i.minStock && i.stock > 0).length;
-        const openShoppingValue = shoppingList.filter(i => !i.done).reduce((sum, i) => sum + i.estimatedPrice, 0);
-        const completionRate = shoppingList.length
-          ? Math.round((shoppingList.filter(i => i.done).length / shoppingList.length) * 100)
-          : 0;
-        return { totalInventoryValue, emptyItems, lowStockItems, openShoppingValue, completionRate };
-      }, [items, shoppingList]);
+      const spending = useMemo(() => {
+        const totals = {};
+        data.completed.forEach(item => {
+          if (item.paidBy) totals[item.paidBy] = (totals[item.paidBy] || 0) + item.price;
+        });
+        return totals;
+      }, [data.completed]);
 
-      function addMember() {
-        if (newMember.trim() && !teamMembers.includes(newMember.trim())) {
-          setTeamMembers([...teamMembers, newMember.trim()]);
-          setNewMember('');
-        }
-      }
+      const remainingBudget = useMemo(() => {
+        const spent = Object.values(spending).reduce((a, b) => a + b, 0);
+        return data.budget.total - spent;
+      }, [spending, data.budget.total]);
 
-      function removeMember(name) {
-        setTeamMembers(teamMembers.filter(m => m !== name));
-      }
+      const filteredList = useMemo(() => {
+        let list = data.shoppingList;
+        if (filterChip === 'urgent') list = list.filter(i => i.priority === 'urgent');
+        if (filterChip === 'today') list = list.filter(i => new Date(i.date).toDateString() === new Date().toDateString());
+        if (filterChip === 'market') list = list.filter(i => i.category === 'market');
+        if (filterChip === 'drugstore') list = list.filter(i => i.category === 'drugstore');
+        if (filterChip === 'favorites') list = list.filter(i => i.isFavorite);
+        return list.filter(i => !i.done);
+      }, [data.shoppingList, filterChip]);
 
       function addShoppingItem() {
-        if (!shoppingForm.title.trim()) {
-          alert('Please enter a title');
-          return;
-        }
-        callApi('addShoppingItem', {
-          title: shoppingForm.title.trim(),
-          priority: shoppingForm.priority,
-          buyer: shoppingForm.buyer,
-          estimatedPrice: Number(shoppingForm.estimatedPrice || 0)
-        }).then(() => {
-          fetchData().then(data => {
-            setShoppingList(data.shoppingList || []);
-          });
-        });
-        setShoppingForm({
-          title: '',
-          priority: 'Medium',
-          buyer: 'Yesim',
-          estimatedPrice: '',
-          photo: null
-        });
-        setShoppingFormOpen(false);
-      }
-
-      function completeShoppingItem(id) {
-        const item = shoppingList.find(i => i.id === id);
-        if (!item || checkoutForm[id] === undefined) {
-          alert('Please enter quantity');
-          return;
-        }
-        const quantity = parseInt(checkoutForm[id]) || 0;
-        if (quantity <= 0) {
-          alert('Quantity must be greater than 0');
-          return;
-        }
-        const existingItem = items.find(i => i.name === item.title);
-        if (existingItem) {
-          callApi('updateStock', {
-            itemId: existingItem.id,
-            quantity: quantity
-          }).then(() => {
-            setShoppingList(shoppingList.map(i => 
-              i.id === id ? { ...i, done: true, quantity: quantity } : i
-            ));
-            const newCheckoutForm = { ...checkoutForm };
-            delete newCheckoutForm[id];
-            setCheckoutForm(newCheckoutForm);
-            fetchData().then(data => {
-              setItems(data.items || []);
-              setShoppingList(data.shoppingList || []);
-            });
-          });
-        } else {
-          callApi('addInventoryItem', {
-            name: item.title,
-            price: item.estimatedPrice,
-            stock: quantity,
-            minStock: 1,
-            buyer: item.buyer
-          }).then(() => {
-            setShoppingList(shoppingList.map(i => 
-              i.id === id ? { ...i, done: true, quantity: quantity } : i
-            ));
-            fetchData().then(data => {
-              setItems(data.items || []);
-              setShoppingList(data.shoppingList || []);
-            });
-          });
-        }
-      }
-
-      function deleteShopping(id) {
-        callApi('deleteShopping', { id: id }).then(() => {
-          setShoppingList(shoppingList.filter(i => i.id !== id));
-        });
-      }
-
-      function handlePhotoUpload(e) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setShoppingForm({
-            ...shoppingForm,
-            photo: event.target.result
-          });
+        if (!newItem.title.trim() || !newItem.price) return;
+        const item = {
+          id: Date.now(),
+          title: newItem.title,
+          price: parseFloat(newItem.price),
+          buyer: newItem.buyer,
+          category: newItem.category,
+          priority: newItem.priority,
+          done: false,
+          paidBy: null,
+          addedBy: 'Yesim',
+          date: new Date().toISOString(),
+          isFavorite: false,
+          recurring: false
         };
-        reader.readAsDataURL(file);
+        callApi('addShoppingItem', item).then(() => {
+          setData({ ...data, shoppingList: [...data.shoppingList, item] });
+          setNewItem({ title: '', price: '', buyer: 'Yesim', category: 'market', priority: 'normal' });
+        });
       }
 
-      function updateMinStock(itemId, newMin) {
-        setItems(items.map(i =>
-          i.id === itemId ? { ...i, minStock: parseInt(newMin) || 0 } : i
-        ));
+      function completeItem(id, quantity = 1) {
+        const item = data.shoppingList.find(i => i.id === id);
+        if (!item) return;
+        const completed = {
+          ...item,
+          quantity,
+          done: true,
+          date: new Date().toISOString(),
+          paidBy: item.buyer
+        };
+        callApi('completeItem', completed).then(() => {
+          setData({
+            ...data,
+            shoppingList: data.shoppingList.filter(i => i.id !== id),
+            completed: [completed, ...data.completed]
+          });
+        });
+      }
+
+      function deleteItem(id) {
+        callApi('deleteItem', { id }).then(() => {
+          setData({ ...data, shoppingList: data.shoppingList.filter(i => i.id !== id) });
+        });
+      }
+
+      function toggleFavorite(id) {
+        setData({
+          ...data,
+          shoppingList: data.shoppingList.map(i => 
+            i.id === id ? { ...i, isFavorite: !i.isFavorite } : i
+          )
+        });
       }
 
       return (
         <div className="app">
           <div className="phone">
             <div className="header">
-              <button className="hamburger" onClick={() => setMobileMenuOpen(true)}>☰</button>
-              <h2 style={{ margin: 0, fontSize: '18px' }}>Shopping Manager</h2>
-              <div style={{ width: 40 }}></div>
-            </div>
-
-            <div className={`mobile-nav ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
-            <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-              <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)}>✕</button>
-              {[['dashboard', '📊 Dashboard'], ['shopping', '🛒 Shopping'], ['members', '👥 Members']].map(([key, label]) => (
-                <button key={key} className={`mobile-menu-item ${tab === key ? 'active' : ''}`} onClick={() => { setTab(key); setMobileMenuOpen(false); }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <section className="hero">
-              <div>
-                <p className="sub">Smart Household Shopping</p>
-                <h1>Shared Shopping List</h1>
-                <p className="sub">Track, buy, and manage stock together.</p>
+              <button className="hamburger">☰</button>
+              <h1>Smart Household</h1>
+              <div className="header-info">
+                <div>{data.budget.currency} {remainingBudget.toFixed(2)}</div>
+                <div style={{fontSize: 10, color: '#6b7280'}}>remaining</div>
               </div>
-              <div className="badge">Real-time Sync</div>
-            </section>
+            </div>
 
-            <section className="grid metrics">
-              <MetricCard label="Stock Value" value={formatCurrency(metrics.totalInventoryValue)} icon="💰" />
-              <MetricCard label="Empty Items" value={metrics.emptyItems} icon="🚨" />
-              <MetricCard label="Low Stock" value={metrics.lowStockItems} icon="⚠️" />
-              <MetricCard label="Completion" value={`${metrics.completionRate}%`} icon="✅" />
-            </section>
+            <div className="hero">
+              <h2>Monthly Budget Overview</h2>
+              <p>{data.budget.month} • Total: €{data.budget.total}</p>
+            </div>
 
             <div className="tabs">
-              {[['dashboard', 'Dashboard'], ['shopping', 'Shopping'], ['members', 'Members']].map(([key, label]) => (
-                <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <div className="bottom-nav">
-              {[['dashboard', '📊'], ['shopping', '🛒'], ['members', '👥']].map(([key, icon]) => (
-                <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)} style={{ fontSize: '18px' }}>
-                  {icon}
+              {['dashboard', 'shopping', 'history', 'budget', 'members', 'summary'].map(t => (
+                <button key={t} className={`tab-btn ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
             </div>
 
             {tab === 'dashboard' && (
-              <section className="tab-panel active">
-                <div className="card section">
-                  <h3>Current Stock</h3>
-                  <div className="desc">Items in household inventory</div>
-                  <div className="list" style={{ marginTop: 16 }}>
-                    {items.map(item => (
-                      <div key={item.id} className={`card ${item.stock === 0 ? 'empty-item' : ''}`} style={{ padding: 14, borderColor: item.stock === 0 ? '#dc2626' : undefined }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                          <div style={{ flex: 1 }}>
-                            <div className="title" style={{ color: item.stock === 0 ? '#991b1b' : 'inherit' }}>{item.name}</div>
-                            <div className="small">Stock: <strong>{item.stock}</strong> | Min: 
-                              <input 
-                                type="number" 
-                                value={item.minStock} 
-                                onChange={(e) => updateMinStock(item.id, e.target.value)}
-                                style={{ width: 40, marginLeft: 4, padding: 2, marginRight: 4 }}
-                              />
-                            </div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div className="title">{formatCurrency(item.price)}</div>
-                          </div>
-                        </div>
+              <div className="tab-panel active">
+                <div className="grid grid-4">
+                  <div className="kpi-card">
+                    <div className="kpi-label">Remaining Budget</div>
+                    <div className="kpi-value" style={{color: remainingBudget < 0 ? '#dc2626' : '#10b981'}}>€{remainingBudget.toFixed(2)}</div>
+                  </div>
+                  <div className="kpi-card">
+                    <div className="kpi-label">Total Spent</div>
+                    <div className="kpi-value">€{Object.values(spending).reduce((a,b) => a+b, 0).toFixed(2)}</div>
+                  </div>
+                  <div className="kpi-card">
+                    <div className="kpi-label">Open Items</div>
+                    <div className="kpi-value">{data.shoppingList.filter(i => !i.done).length}</div>
+                  </div>
+                  <div className="kpi-card">
+                    <div className="kpi-label">Low Stock Items</div>
+                    <div className="kpi-value">{Math.max(0, data.shoppingList.filter(i => i.priority === 'urgent').length)}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-2" style={{marginTop: 20}}>
+                  <div className="section">
+                    <h3>Spending by Participant</h3>
+                    <div className="chart-container">
+                      <SpendingChart data={data.completed} />
+                    </div>
+                  </div>
+
+                  <div className="section">
+                    <h3>Quick Stats</h3>
+                    {Object.entries(spending).map(([person, total]) => (
+                      <div key={person} className="summary-row">
+                        <span className="summary-label">{person}</span>
+                        <span className="summary-value">€{total.toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              </section>
+
+                <div className="section" style={{marginTop: 20}}>
+                  <h3>🚨 Urgent Items ({data.shoppingList.filter(i => i.priority === 'urgent').length})</h3>
+                  <div className="list">
+                    {data.shoppingList.filter(i => i.priority === 'urgent' && !i.done).slice(0, 5).map(item => (
+                      <div key={item.id} className="item urgent">
+                        <div className="item-left">
+                          <div className="item-info">
+                            <div className="item-title">{item.title}</div>
+                            <div className="item-meta">€{item.price} • {item.buyer}</div>
+                          </div>
+                        </div>
+                        <div>€{item.price}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="section" style={{marginTop: 20}}>
+                  <h3>📋 Still Open ({data.shoppingList.filter(i => !i.done).length})</h3>
+                  <div className="list" style={{maxHeight: 300, overflowY: 'auto'}}>
+                    {data.shoppingList.filter(i => !i.done).slice(0, 10).map(item => (
+                      <div key={item.id} className="item">
+                        <div className="item-left">
+                          <div className="item-info">
+                            <div className="item-title">{item.title}</div>
+                            <div className="item-meta">€{item.price} • {item.buyer}</div>
+                          </div>
+                        </div>
+                        <div>€{item.price}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
 
             {tab === 'shopping' && (
-              <section className="tab-panel active">
-                <div className="card section">
-                  <div className="toolbar">
-                    <div><h3>Shopping List</h3><div className="desc">Track items to buy</div></div>
-                    <button className="btn" onClick={() => setShoppingFormOpen(!shoppingFormOpen)}>+ Add</button>
+              <div className="tab-panel active">
+                <div className="section">
+                  <h3>Add New Item</h3>
+                  <div className="grid grid-2" style={{gap: 12, marginTop: 12}}>
+                    <input className="input" placeholder="Item name" value={newItem.title} onChange={(e) => setNewItem({...newItem, title: e.target.value})} />
+                    <input className="input" type="number" placeholder="Price" value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} />
+                    <select className="select" value={newItem.buyer} onChange={(e) => setNewItem({...newItem, buyer: e.target.value})}>
+                      {data.teamMembers.map(m => <option key={m}>{m}</option>)}
+                    </select>
+                    <select className="select" value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})}>
+                      <option value="market">Market</option>
+                      <option value="drugstore">Drugstore</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <select className="select" style={{gridColumn: 'span 2'}} value={newItem.priority} onChange={(e) => setNewItem({...newItem, priority: e.target.value})}>
+                      <option value="normal">Normal</option>
+                      <option value="urgent">Urgent</option>
+                      <option value="today">Today</option>
+                    </select>
                   </div>
-                  {shoppingFormOpen && (
-                    <div className="form-card">
-                      <input className="input" placeholder="Item name" value={shoppingForm.title} onChange={(e) => setShoppingForm({ ...shoppingForm, title: e.target.value })} />
-                      <div className="row-2">
-                        <select className="select" value={shoppingForm.priority} onChange={(e) => setShoppingForm({ ...shoppingForm, priority: e.target.value })}>
-                          <option>High</option><option>Medium</option><option>Low</option>
-                        </select>
-                        <select className="select" value={shoppingForm.buyer} onChange={(e) => setShoppingForm({ ...shoppingForm, buyer: e.target.value })}>
-                          {teamMembers.map(m => <option key={m}>{m}</option>)}
-                        </select>
-                      </div>
-                      <input className="input" type="number" step="0.01" placeholder="Est. price" value={shoppingForm.estimatedPrice} onChange={(e) => setShoppingForm({ ...shoppingForm, estimatedPrice: e.target.value })} />
-                      <div>
-                        <label style={{ display: 'block', marginBottom: 8, cursor: 'pointer', fontSize: 12 }}>
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={handlePhotoUpload}
-                            style={{ cursor: 'pointer' }}
-                          />
-                          📸 Add Photo from Phone
-                        </label>
-                        {shoppingForm.photo && <img src={shoppingForm.photo} alt="preview" className="photo-preview" />}
-                      </div>
-                      <button className="btn" onClick={addShoppingItem}>Save Item</button>
-                    </div>
-                  )}
+                  <button className="btn" style={{width: '100%', marginTop: 12}} onClick={addShoppingItem}>Add Item</button>
+                </div>
+
+                <div className="section" style={{marginTop: 20}}>
+                  <h3>Shopping List</h3>
+                  <div className="filter-chips">
+                    {['all', 'urgent', 'today', 'market', 'drugstore', 'favorites'].map(f => (
+                      <button key={f} className={`chip ${filterChip === f ? 'active' : ''}`} onClick={() => setFilterChip(f)}>
+                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                   <div className="list">
-                    {shoppingList.map(entry => (
-                      <div key={entry.id} className={`shopping-item ${entry.stock === 0 ? 'empty-highlight' : ''}`} style={{ borderColor: entry.done ? '#ccc' : undefined }}>
-                        <div className="shopping-left">
-                          <div style={{ flex: 1, width: '100%' }}>
-                            <div className={`title ${entry.done ? 'done-text' : ''}`}>{entry.title}</div>
-                            <div className="chips">
-                              <span className="chip">{entry.priority}</span>
-                              <span className="chip dark">{entry.buyer}</span>
-                              <span className="chip">{formatCurrency(entry.estimatedPrice)}</span>
+                    {filteredList.map(item => (
+                      <div key={item.id} className={`item ${item.priority === 'urgent' ? 'urgent' : ''}`}>
+                        <div className="item-left">
+                          <input type="checkbox" onChange={() => completeItem(item.id)} />
+                          <div className="item-info">
+                            <div className="item-title">{item.title}{item.isFavorite ? ' ⭐' : ''}</div>
+                            <div style={{display: 'flex', gap: 4, marginTop: 4}}>
+                              <span className={`badge ${item.priority === 'urgent' ? 'urgent' : ''}`}>{item.priority}</span>
+                              <span className={`badge ${item.category}`}>{item.category}</span>
+                              <span className="badge">{item.buyer}</span>
                             </div>
-                            {!entry.done && (
-                              <div className="checkout-form">
-                                <label style={{ fontSize: 12, color: '#6b7280' }}>Quantity bought:</label>
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    placeholder="Qty"
-                                    className="input quantity-input"
-                                    value={checkoutForm[entry.id] || ''}
-                                    onChange={(e) => setCheckoutForm({ ...checkoutForm, [entry.id]: e.target.value })}
-                                  />
-                                  <button 
-                                    className="btn" 
-                                    style={{ flex: 1 }}
-                                    onClick={() => completeShoppingItem(entry.id)}
-                                  >
-                                    Checkout
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                            {entry.photo && <img src={entry.photo} alt="item" className="photo-preview" />}
                           </div>
                         </div>
-                        <button className="delete" onClick={() => deleteShopping(entry.id)}>🗑️</button>
+                        <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+                          <strong>€{item.price}</strong>
+                          <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => toggleFavorite(item.id)}>⭐</button>
+                          <button className="btn secondary" style={{padding: '4px 8px', fontSize: 12}} onClick={() => deleteItem(item.id)}>🗑️</button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              </section>
+              </div>
+            )}
+
+            {tab === 'history' && (
+              <div className="tab-panel active">
+                <div className="section">
+                  <h3>Completed Purchases</h3>
+                  <div className="list">
+                    {data.completed.map(item => (
+                      <div key={item.id} className="item">
+                        <div className="item-left">
+                          <div className="item-info">
+                            <div className="item-title">{item.title}</div>
+                            <div className="item-meta">Paid by {item.paidBy} on {new Date(item.date).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                        <div><strong>€{item.price}</strong></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tab === 'budget' && (
+              <div className="tab-panel active">
+                <div className="section">
+                  <h3>Budget Status</h3>
+                  <div className="summary-row">
+                    <span>Total Budget</span>
+                    <span className="summary-value">€{data.budget.total}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Total Spent</span>
+                    <span className="summary-value">€{Object.values(spending).reduce((a,b) => a+b, 0).toFixed(2)}</span>
+                  </div>
+                  <div className="summary-row" style={{background: remainingBudget < 0 ? '#fee2e2' : '#dcfce7', borderRadius: 8, padding: 12, marginTop: 12}}>
+                    <span style={{fontWeight: 600}}>Remaining</span>
+                    <span className="summary-value" style={{color: remainingBudget < 0 ? '#991b1b' : '#166534'}}>€{remainingBudget.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="section" style={{marginTop: 20}}>
+                  <h3>Spending Breakdown</h3>
+                  {Object.entries(spending).map(([person, total]) => (
+                    <div key={person} className="summary-row">
+                      <span>{person}</span>
+                      <span className="summary-value">€{total.toFixed(2)} ({((total / data.budget.total) * 100).toFixed(0)}%)</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             {tab === 'members' && (
-              <section className="tab-panel active">
-                <div className="card section">
-                  <h3>Household Members</h3>
-                  <div className="desc">Manage who shares the shopping list</div>
-                  <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <input 
-                        className="input" 
-                        placeholder="Add new member" 
-                        value={newMember} 
-                        onChange={(e) => setNewMember(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && addMember()}
-                      />
-                      <button className="btn" onClick={addMember}>Add</button>
-                    </div>
-                    <div className="list">
-                      {teamMembers.map(member => (
-                        <div key={member} className="member-badge">
-                          <span>{member}</span>
-                          <button className="delete" onClick={() => removeMember(member)}>✕</button>
+              <div className="tab-panel active">
+                <div className="section">
+                  <h3>Team Members</h3>
+                  <div className="list">
+                    {data.teamMembers.map(member => (
+                      <div key={member} className="item">
+                        <div className="item-info">
+                          <div className="item-title">{member}</div>
+                          <div className="item-meta">Spent: €{(spending[member] || 0).toFixed(2)}</div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </section>
+              </div>
+            )}
+
+            {tab === 'summary' && (
+              <div className="tab-panel active">
+                <div className="section">
+                  <h3>Monthly Summary</h3>
+                  <div className="summary-row">
+                    <span>Month</span>
+                    <span className="summary-value">{data.budget.month}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Total Budget</span>
+                    <span className="summary-value">€{data.budget.total}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Total Spent</span>
+                    <span className="summary-value">€{Object.values(spending).reduce((a,b) => a+b, 0).toFixed(2)}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Completed Items</span>
+                    <span className="summary-value">{data.completed.length}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Open Items</span>
+                    <span className="summary-value">{data.shoppingList.filter(i => !i.done).length}</span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
-      )
+      );
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />)
